@@ -1,0 +1,82 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </script>
+    <meta name="google-signin-client_id" content="972880655965-i9sbv1024l6tf0rnsk4e9a9snsjhkrkt.apps.googleusercontent.com">
+</head>
+<body>
+    <a href="#" onclick="signOut();">Sign out</a>
+    <div id="my-signin2" class="g-signin2" onclick="onLoad();" data-onsuccess="onSignIn"></div>
+    <div id="result"></div>
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+              console.log('User signed out.');
+            });
+          };
+        signOut();
+        function onSignIn(googleUser) {
+          console.log(googleUser);
+          console.log(googleUser.aaa.bbb);
+          access_token = googleUser.Zi.access_token;
+          id_token = googleUser.getAuthResponse().id_token;
+          if (id_token) {
+            $("#my-signin2").attr("style", "display:None")
+          };
+          var code = {id: id_token,
+                      access: access_token}
+          $.ajax({
+            type: "POST",
+            url: '/gconnect?state={{STATE}}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(code),
+            success: function(result) {
+                console.log(result);
+                if (result) {
+                    $("#result").html('Login Successfully!</br>' + result + '</br>Redirecting...')
+                    setTimeout(function() {
+                        window.location.href = '/restaurant';
+                    }, 4000);
+                  } else {
+                    console.log('There was an error')
+                  }
+                }
+            });
+            console.log(googleUser);
+          }
+        function onFailure(error) {
+          console.log(error);
+        };
+        function renderButton() {
+          gapi.signin2.render('my-signin2', {
+            'scope': 'profile email',
+            'width': 240,
+            'height': 50,
+            'longtitle': true,
+            'theme': 'dark',
+            'onsuccess': onSuccess,
+            'onfailure': onFailure
+          });
+        }
+        function onLoad() {
+           gapi.load('auth2', function() {
+              auth2 = gapi.auth2.init({
+                client_id: '972880655965-i9sbv1024l6tf0rnsk4e9a9snsjhkrkt.apps.googleusercontent.com',
+                fetch_basic_profile: true,
+                scope: 'profile',
+                prompt: 'consent'
+              });
+
+              // Sign the user in, and then retrieve their ID.
+              auth2.signIn().then(function() {
+                onSignIn(auth2.currentUser.get());
+              });
+            }); 
+        }
+        
+    </script>
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+</body>
+</html>
